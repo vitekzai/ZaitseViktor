@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
 using System.Xml;
+using System.Threading.Tasks;
 
 namespace Zaitsev_Laba1
 {
@@ -27,7 +28,7 @@ namespace Zaitsev_Laba1
 
     class Program
     {
-
+        // Метод сжатия
         public static void Compress(string sourceFile, string compressedFile)
         {
             // поток для чтения исходного файла
@@ -47,6 +48,7 @@ namespace Zaitsev_Laba1
             }
         }
 
+        // Метод разархивации
         public static void Decompress(string compressedFile, string targetFile)
         {
             // поток для чтения из сжатого файла
@@ -66,6 +68,8 @@ namespace Zaitsev_Laba1
         }
         static void Main(string[] args)
         {
+            //      1
+            // Работа с дисками
             DriveInfo[] drives = DriveInfo.GetDrives();
 
             foreach (DriveInfo d in drives)
@@ -82,27 +86,37 @@ namespace Zaitsev_Laba1
                 Console.WriteLine();
             }
 
+            //      2
+            // Работа с файлами. Классы File, FileStream и др.
             string p = @"note.txt";
             Console.WriteLine("Введите текст для записи в файл:");
             string txt = Console.ReadLine();
 
-            //запись в файл
+            // создание и запись в файл
             try
             {
                 using (FileStream fs = File.Create(p))
                 {
                     //преобразуем строку в байты
                     byte[] array = System.Text.Encoding.Default.GetBytes(txt);
+                    // запись массива байтов в файл
                     fs.Write(array, 0, array.Length);
+                    Console.WriteLine("Текст записан в файл");
                 }
 
-                using (StreamReader sr = File.OpenText(p))
+                // Чтение файла
+
+                //using (StreamReader sr = File.OpenText(p))
+                //{
+                //    string s = "";
+                //    while ((s = sr.ReadLine()) != null)
+                //    {
+                //        Console.WriteLine("Считывание текста из файла: {0}", s);
+                //    }
+                //}
+                using (StreamReader sr = new StreamReader(p))
                 {
-                    string s = "";
-                    while ((s = sr.ReadLine()) != null)
-                    {
-                        Console.WriteLine("Считывание текста из файла: {0}", s);
-                    }
+                    Console.WriteLine("Считывание текста из файла: {0}", sr.ReadToEnd());
                 }
             }
             catch (Exception ex)
@@ -110,13 +124,14 @@ namespace Zaitsev_Laba1
                 Console.WriteLine(ex.ToString());
             }
 
+            // Удаление
             string curTxt = p;
-            Console.WriteLine(File.Exists(curTxt) ? "Нажмите 1 чтобы удалить файл" : "Файл не существует");
-            string num1 = Console.ReadLine();
+            Console.WriteLine(File.Exists(curTxt) ? "Введите 'да' для удаления файла" : "Файл не существует");
+            string choice = Console.ReadLine();
 
-            switch (num1)
+            switch (choice)
             {
-                case "1":
+                case "да":
                     File.Delete(p);
                     Console.WriteLine("Файл удален\n");
                     break;
@@ -125,7 +140,12 @@ namespace Zaitsev_Laba1
                     break;
             }
 
-            Person tom = new Person("Tom", 37);
+            //      3
+            // Работа с форматом JSON
+
+            // Создаем объект
+            Person tom = new Person("Tom", 35);
+            // Сериализуем и записываем
             string json = JsonSerializer.Serialize(tom);
             using (FileStream fs = new FileStream("person.json", FileMode.OpenOrCreate))
             {
@@ -133,7 +153,7 @@ namespace Zaitsev_Laba1
                 fs.Write(info, 0, info.Length);
                 Console.WriteLine("Текст записан в файл");
             }
-
+            // Чтение
             using (FileStream fs = File.OpenRead("person.json"))
             {
                 byte[] info = new byte[fs.Length];
@@ -143,12 +163,12 @@ namespace Zaitsev_Laba1
             }
             string j = @"person.json";
             string curJson = j;
-            Console.WriteLine(File.Exists(curJson) ? "Нажмите 1 чтобы удалить файл" : "Файл не существует");
-            string num2 = Console.ReadLine();
-
-            switch (num2)
+            Console.WriteLine(File.Exists(curJson) ? "Введите 'да' для удаления файла" : "Файл не существует");
+            string choice2 = Console.ReadLine();
+            // Удаление
+            switch (choice2)
             {
-                case "1":
+                case "да":
                     File.Delete(j);
                     Console.WriteLine("Файл удален\n");
                     break;
@@ -157,7 +177,10 @@ namespace Zaitsev_Laba1
                     break;
             }
 
-            Console.WriteLine("Текст из XML файла:");
+            //      4
+            // Работа с форматом XML
+
+            
             XmlDocument xDoc = new XmlDocument();
             xDoc.Load("user.xml");
             XmlElement xRoot = xDoc.DocumentElement;
@@ -171,9 +194,15 @@ namespace Zaitsev_Laba1
             XmlElement companyElem = xDoc.CreateElement("company");
 
             //создаем текстовые занчения для атрибута и эллементов
-            XmlText nameText = xDoc.CreateTextNode("Viktor");
-            XmlText ageText = xDoc.CreateTextNode("22");
-            XmlText companyText = xDoc.CreateTextNode("Yandex");
+            Console.WriteLine("Введите имя:");
+            string xmlname = Console.ReadLine();
+            XmlText nameText = xDoc.CreateTextNode(xmlname);
+            Console.WriteLine("Введите возраст:");
+            string xmlage = Console.ReadLine();
+            XmlText ageText = xDoc.CreateTextNode(xmlage);
+            Console.WriteLine("Введите название компании:");
+            string xmlcompany = Console.ReadLine();
+            XmlText companyText = xDoc.CreateTextNode(xmlcompany);
 
             //добавляем узлы
             nameAtr.AppendChild(nameText);
@@ -193,6 +222,7 @@ namespace Zaitsev_Laba1
             // сохраняем изменения xml-документа в файл
             xDoc.Save("user.xml");
 
+            Console.WriteLine("Текст из XML файла:");
             xDoc.Load("user.xml");
             if (xRoot != null)
             {
@@ -222,6 +252,8 @@ namespace Zaitsev_Laba1
             if (firstNode != null) xRootD.RemoveChild(firstNode);
             xDocD.Save("user.xml");
 
+            //      5
+            // Создание zip архива, добавление туда файла, определение размера архива
             Compress("compress.xml", "zipfile.zip");
 
             // Создание zip архива
@@ -229,7 +261,7 @@ namespace Zaitsev_Laba1
             var f_name = Console.ReadLine();
             if (f_name == null)
                 return;
-
+            
             Compress(f_name, "zipfile2.zip");
 
             Console.WriteLine("Разархивирование zipfile2.zip и вывод данных о нем.");
